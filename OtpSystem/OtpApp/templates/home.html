@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page d'Accueil</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem 0;
+            text-align: center;
+        }
+
+        header h1 {
+            margin-bottom: 0.5rem;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        section#accueil {
+            background-color: #e2e2e2;
+        }
+
+        section#services {
+            background-color: #d9d9d9;
+        }
+
+        section#contact {
+            background-color: #c7c7c7;
+        }
+
+        footer {
+            text-align: center;
+            background-color: #333;
+            color: #fff;
+            padding: 1rem 0;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bienvenue sur ma page d'accueil</h1>
+        <nav>
+            <ul>
+                <li><a href="#accueil">Accueil</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#contact">Contact</a></li>
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'logout' %}">Logout</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <section id="accueil">
+        <h2>Introduction</h2>
+        <p>Ceci est une simple page d'accueil réalisée avec HTML et CSS.</p>
+    </section>
+
+    <section id="services">
+        <h2>Nos Services</h2>
+        <p>Nous offrons divers services pour répondre à vos besoins.</p>
+    </section>
+
+    <section id="contact">
+        <h2>Contactez-nous</h2>
+        <p>Vous pouvez nous contacter via notre email: example@domain.com</p>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Mon Site Web</p>
+    </footer>
+</body>
+</html>

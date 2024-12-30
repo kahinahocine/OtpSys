@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    form {
+        background: #fff;
+        width: 100%;
+        max-width: 400px;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        margin: 0 auto;
+    }
+    form h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #333;
+        text-align: center;
+    }
+    form .form-label {
+        font-weight: 600;
+        color: #555;
+    }
+    form .form-control {
+        border-radius: 10px;
+    }
+    form button {
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        border: none;
+        color: #fff;
+        font-weight: bold;
+        border-radius: 10px;
+        padding: 10px 15px;
+        transition: background 0.3s ease;
+    }
+    form button:hover {
+        background: linear-gradient(135deg, #5b0fb0, #1e6cd4);
+    }
+    form p {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 0.9rem;
+    }
+    form p a {
+        color: #2575fc;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    form p a:hover {
+        text-decoration: underline;
+    }
+    form small {
+        color: #ff4d4f;
+        font-size: 0.85rem;
+    }
+</style>
+
+<form action="" method="POST">
+    {% csrf_token %}
+    <h3>Sign Up to Join Us</h3>
+
+    {% for field in form %}
+        {% if field.errors %}
+        <div class="mb-4">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+            <small>{{ field.errors|join:" " }}</small>
+        </div>
+        {% else %}
+        <div class="mb-4">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+        </div>
+        {% endif %}
+    {% endfor %}
+    
+    <button class="btn btn-primary w-100 mb-3">Register</button>
+    <p>Already have an account? <a href="{% url 'signin' %}">Login here</a></p>
+</form>
+{% endblock content %}

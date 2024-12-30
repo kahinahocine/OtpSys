@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    
+    .form-container {
+        width: 500px;  
+        margin: 100px auto;  
+        padding: 20px;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+        border-radius: 10px;
+    }
+
+    .form-container h3 {
+        text-align: center;
+    }
+
+    .form-container .error-message {
+        color: red;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="form-container">
+    <form action="" method="POST">
+        {% csrf_token %}
+        <h3><strong>Reset your password</strong></h3>
+
+        {% if error %}
+        <p class="error-message">{{ error }}</p>  <!-- Show error message if passed -->
+        {% endif %}
+        
+        <div class="mb-3">
+            <label class="form-label">Email Address</label>
+            <input class="form-control" name="email" placeholder="Enter email-address" required>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%">Send OTP</button>
+    </form>
+</div>
+
+{% endblock content %}
