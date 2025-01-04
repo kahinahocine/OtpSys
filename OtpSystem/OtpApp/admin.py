@@ -8,11 +8,6 @@ class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'is_active', 'last_ip', 'last_seen')
     
     # Ajout des champs dans la vue détaillée de l'utilisateur
-    fieldsets = UserAdmin.fieldsets + (
-        ('Additional Info', {
-            'fields': ('last_ip', 'last_seen'),
-        }),
-    )
     
 
     add_fieldsets = (

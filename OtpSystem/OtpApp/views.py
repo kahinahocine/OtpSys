@@ -22,7 +22,9 @@ def index(request):
     return render(request, "index.html")
 
 def home(request):
-    return render(request, "home.html")
+    context = {"user": request.user}  # Ajouter l'utilisateur connecté au contexte
+    return render(request, "home.html", context)
+
 
 
 
@@ -53,8 +55,6 @@ def signup(request):
             receiver = [user.email]
 
             send_mail(subject, message, sender, receiver, fail_silently=False)
-
-            messages.success(request, "Account created successfully! An OTP has been sent to your email.")
             return redirect("verify-email", username=user.username)
 
     context = {"form": form}
@@ -148,9 +148,9 @@ def resend_otp(request):
     return render(request, "resend_otp.html", context)
 
 
+from django.utils.timezone import now
+from datetime import timedelta
 
-
-@ratelimit(key='ip', rate='5/m', block=True)
 def signin(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -177,8 +177,9 @@ def signin(request):
                 return redirect("register")
 
             # Vérifier si l'utilisateur est verrouillé temporairement
-            if user.last_login_attempt and timezone.now() < user.last_login_attempt + timedelta(minutes=10):
-                messages.error(request, "Your account is temporarily locked. Please try again in 10 minutes.")
+            lock_duration = timedelta(minutes=10)
+            if user.last_login_attempt and now() < user.last_login_attempt + lock_duration:
+                messages.error(request, "Your account is temporarily locked. Please try again later.")
                 return render(request, "login.html")
 
             # Authentification
@@ -192,9 +193,10 @@ def signin(request):
                 return redirect("home")
             else:
                 user.failed_attempts += 1
-                user.last_login_attempt = timezone.now()
+                user.last_login_attempt = now()
                 user.save()
 
+                # Bloquer le compte si le nombre maximal de tentatives est atteint
                 if user.failed_attempts >= settings.MAX_LOGIN_ATTEMPTS:
                     user.is_active = False
                     user.save()
@@ -213,15 +215,17 @@ def check_email_exists(request):
     if request.method == "POST":
         email = request.POST.get("email")  # Capture the email from the request
         if email:
-            # Toujours générer une réponse générique, même si l'email n'existe pas
             user_exists = CustomUser.objects.filter(email=email).exists()
             if user_exists:
-                # Générer l'OTP seulement si l'utilisateur existe
+                # Generate OTP and associate it with the user
                 user = CustomUser.objects.get(email=email)
                 otp = OtpToken.objects.create(
                     user=user,
                     otp_expires_at=timezone.now() + timezone.timedelta(minutes=5)
                 )
+
+                # Store user ID in the session
+                request.session["user_id"] = user.id
 
                 # Email variables
                 subject = "Email Verification - OTP"
@@ -233,7 +237,7 @@ def check_email_exists(request):
                 sender = os.getenv("EMAIL_HOST_USER")
                 receiver = [user.email]
 
-                # Envoyer le mail uniquement si l'utilisateur existe
+                # Send the OTP to the user's email
                 send_mail(
                     subject,
                     message,
@@ -242,13 +246,14 @@ def check_email_exists(request):
                     fail_silently=False,
                 )
 
-            # Message générique, même si l'utilisateur n'existe pas
-            messages.success(request, "If an account with this email exists, an OTP has been sent.")
-            return redirect("otp_resetpass")  # Toujours rediriger ici pour empêcher la détection
-
+                messages.success(request, "An OTP has been sent to your email for password reset.")
+                return redirect("otp_resetpass")  # Redirect to the OTP reset page
+            else:
+                # Show error message if user does not exist
+                messages.warning(request, "This email does not exist in the database.")
+                return redirect("reset_pass")  # Redirect to the reset page again
+        
     return render(request, "reset_pass.html")
-
-
 
 
 
@@ -264,7 +269,7 @@ def otp_resetpass(request):
             # Récupérer l'utilisateur correspondant à l'ID
             user = CustomUser.objects.get(id=user_id)
         except CustomUser.DoesNotExist:
-            messages.error(request, "Utilisateur introuvable. Veuillez recommencer.")
+            messages.error(request, "invalid user.")
             return redirect("reset_pass")
 
         # Récupérer le dernier OTP pour cet utilisateur
@@ -277,7 +282,7 @@ def otp_resetpass(request):
         # Vérifier le nombre de tentatives
         attempts_left = settings.MAX_OTP_TRY - user_otp.otp_attempts  # Calculer les tentatives restantes
         if attempts_left <= 0:
-            messages.error(request, "Nombre maximum de tentatives atteint. Veuillez demander un nouveau code OTP.")
+            messages.error(request, "Maximum OTP attempts reached. Please request a new OTP.")
             user_otp.delete()  # Supprimer l'OTP après dépassement des tentatives
             return redirect("reset_pass")
 
@@ -288,17 +293,17 @@ def otp_resetpass(request):
             if entered_otp == user_otp.otp_code:
                 if user_otp.otp_expires_at and user_otp.otp_expires_at > timezone.now():
                     user_otp.delete()  # Supprimer l'OTP après une vérification réussie
-                    messages.success(request, "OTP vérifié avec succès ! Réinitialisez votre mot de passe.")
+                    messages.success(request, "Reset your password !")
                     return redirect("reset_password", username=user.username)
                 else:
-                    messages.warning(request, "Le code OTP a expiré. Veuillez en demander un nouveau.")
+                    messages.warning(request, "The otp code has expired.")
                     return redirect("resend-otp")
             else:
                 user_otp.otp_attempts += 1
                 user_otp.save()
                 attempts_left -= 1  # Mettre à jour les tentatives restantes après l'échec
                 if attempts_left > 0:
-                    messages.error(request, f"Code OTP invalide. Il vous reste {attempts_left} tentative(s).")
+                    messages.error(request, f"Invalid Otp.")
                 else:
                     messages.error(request, "Nombre maximum de tentatives atteint. Veuillez demander un nouveau code OTP.")
                     user_otp.delete()

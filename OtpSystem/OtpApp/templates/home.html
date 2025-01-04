@@ -12,30 +12,32 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
             line-height: 1.6;
         }
 
         header {
-            background-color: #333;
+            background-color: #6a11cb;
             color: #fff;
-            padding: 1rem 0;
-            text-align: center;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         header h1 {
-            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
         }
 
         nav ul {
             list-style-type: none;
-            padding: 0;
+            display: flex;
+            gap: 1.5rem;
         }
 
         nav ul li {
-            display: inline;
-            margin: 0 15px;
+            margin: 0;
         }
 
         nav ul li a {
@@ -48,64 +50,96 @@
             text-decoration: underline;
         }
 
+        .welcome-message {
+            font-size: 1rem;
+            font-style: italic;
+            margin-left: auto;
+            color: #fff;
+        }
+
         section {
             padding: 2rem;
-            margin: 2rem 0;
+            margin: 2rem auto;
+            max-width: 800px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         section#accueil {
-            background-color: #e2e2e2;
+            background-color: #f4f4f4;
         }
 
-        section#services {
-            background-color: #d9d9d9;
+        section h2 {
+            margin-bottom: 1rem;
+            color: #333;
         }
 
-        section#contact {
-            background-color: #c7c7c7;
+        section p {
+            margin-bottom: 1rem;
+            color: #555;
         }
 
         footer {
             text-align: center;
-            background-color: #333;
+            background-color: #6a11cb;
             color: #fff;
             padding: 1rem 0;
             margin-top: 2rem;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #6a11cb;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .button:hover {
+            background-color: #6a11cb;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Bienvenue sur ma page d'accueil</h1>
         <nav>
             <ul>
                 <li><a href="#accueil">Accueil</a></li>
                 <li><a href="#services">Services</a></li>
                 <li><a href="#contact">Contact</a></li>
-                {% if user.is_authenticated %}
-                <li><a href="{% url 'logout' %}">Logout</a></li>
-                {% endif %}
             </ul>
         </nav>
+        {% if user.is_authenticated %}
+        <div class="welcome-message">
+            Bonjour, {{ user.username }} !
+            <a class="button" href="{% url 'logout' %}">Se déconnecter</a>
+        </div>
+        {% else %}
+        <a class="button" href="{% url 'signin' %}">Se connecter</a>
+        {% endif %}
     </header>
 
     <section id="accueil">
         <h2>Introduction</h2>
-        <p>Ceci est une simple page d'accueil réalisée avec HTML et CSS.</p>
+        <p>Bienvenue sur notre site. Découvrez nos services et contactez-nous pour toute information.</p>
     </section>
 
     <section id="services">
         <h2>Nos Services</h2>
-        <p>Nous offrons divers services pour répondre à vos besoins.</p>
+        <p>Nous proposons divers services adaptés à vos besoins, allant du développement web à la gestion de projets.</p>
     </section>
 
     <section id="contact">
         <h2>Contactez-nous</h2>
-        <p>Vous pouvez nous contacter via notre email: example@domain.com</p>
+        <p>Vous pouvez nous joindre à l'adresse suivante : <strong>example@domain.com</strong></p>
+        <a class="button" href="mailto:example@domain.com">Envoyer un email</a>
     </section>
 
     <footer>
-        <p>&copy; 2024 Mon Site Web</p>
+        <p>&copy; 2024 Mon Site Web. Tous droits réservés.</p>
     </footer>
 </body>
 </html>
